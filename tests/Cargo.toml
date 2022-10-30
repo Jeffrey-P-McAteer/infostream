@@ -1,0 +1,15 @@
+[package]
+name = "tests"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dev-dependencies]
+infostream-desktop = { path = "../infostream-desktop" }
+infostream = { path = "../infostream-lib" }
+
+[[test]]
+name = "test_test"
+path = "test_test.rs"
+
+

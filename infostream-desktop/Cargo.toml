@@ -1,0 +1,12 @@
+[package]
+name = "infostream-desktop"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "infostream"
+path = "src/infostream.rs"
+
+[dependencies]
+infostream = { path = "../infostream-lib" }
+
