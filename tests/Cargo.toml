@@ -7,6 +7,7 @@ publish = false
 [dev-dependencies]
 infostream-desktop = { path = "../infostream-desktop" }
 infostream = { path = "../infostream-lib" }
+#url-parse = "1.0"
 
 [[test]]
 name = "test_test"
