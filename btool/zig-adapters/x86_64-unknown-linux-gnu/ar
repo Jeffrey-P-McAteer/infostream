@@ -1,2 +1,2 @@
 #!/bin/sh
-exec zig ar -target x86_64-linux-gnu $@
+exec zig ar -target x86_64-linux-gnu "${ZIG_ADDTL_LINK_ARGS[@]}" $@

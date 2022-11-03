@@ -8,9 +8,9 @@ import shutil
 def main(args=sys.argv):
   move_to_repo_root()
 
-  build_desktop_x86_64_unknown_linux_gnu()
+  #build_desktop_x86_64_unknown_linux_gnu()
   build_desktop_x86_64_pc_windows_gnu()
-  build_desktop_x86_64_apple_darwin()
+  #build_desktop_x86_64_apple_darwin()
   
 
 def move_to_repo_root():
@@ -39,6 +39,15 @@ def ensure_rustup_target_installed(target_triple):
     rustup_exe, 'target', 'add', target_triple
   ], check=True)
 
+def get_addtl_link_args(target_triple):
+  args = []
+
+  if 'windows' in target_triple:
+    if os.path.exists('/usr/x86_64-w64-mingw32/lib'):
+      args.append('-L/usr/x86_64-w64-mingw32/lib ')
+
+  return args
+
 def cargo_build_target(project_name, target_triple):
   zig_host_exe = shutil.which('zig')
   if zig_host_exe is None:
@@ -57,7 +66,7 @@ def cargo_build_target(project_name, target_triple):
       with open(zig_cc_script, 'w') as fd:
         fd.write(f'''
 #!/bin/sh
-exec zig cc -target {target_triple} $@
+exec zig cc -target {target_triple} "${{ZIG_ADDTL_LINK_ARGS[@]}}" $@
 '''.strip())
       make_f_executable(zig_cc_script)
 
@@ -65,7 +74,7 @@ exec zig cc -target {target_triple} $@
       with open(zig_ar_script, 'w') as fd:
         fd.write(f'''
 #!/bin/sh
-exec zig ar -target {target_triple} $@
+exec zig ar -target {target_triple} "${{ZIG_ADDTL_LINK_ARGS[@]}}" $@
 '''.strip())
       make_f_executable(zig_ar_script)
 
@@ -82,10 +91,17 @@ ar = "./{zig_ar_script}"
   cargo_env = {}
   cargo_env.update(os.environ)
   cargo_env['CC'] = os.path.abspath(zig_cc_script)
+  cargo_env['ZIG_ADDTL_LINK_ARGS'] = ' '.join(get_addtl_link_args(target_triple))
 
-  subprocess.run([
+  run_cmd = [
     'cargo', 'build', '-p', project_name, '--release', '--target', target_triple
-  ], env=cargo_env, check=True)
+  ]
+
+  print(f'> CC={cargo_env["CC"]}')
+  print(f'> ZIG_ADDTL_LINK_ARGS={cargo_env["ZIG_ADDTL_LINK_ARGS"]}')
+  print(f'> {" ".join(run_cmd)}')
+
+  subprocess.run(run_cmd, env=cargo_env, check=True)
 
   print(f'> Built {project_name} for {target_triple}!')
 

@@ -1,2 +1,2 @@
 #!/bin/sh
-exec zig cc -target x86_64-windows-gnu $@
+exec zig cc -target x86_64-windows-gnu "${ZIG_ADDTL_LINK_ARGS[@]}" $@
