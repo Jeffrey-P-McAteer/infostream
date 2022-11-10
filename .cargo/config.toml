@@ -2,9 +2,11 @@
 linker = "./btool/zig-adapters/x86_64-pc-windows-gnu/cc"
 ar = "./btool/zig-adapters/x86_64-pc-windows-gnu/ar"
 
-[target.x86_64-unknown-linux-gnu]
-linker = "./btool/zig-adapters/x86_64-unknown-linux-gnu/cc"
-ar = "./btool/zig-adapters/x86_64-unknown-linux-gnu/ar"
+#[target.x86_64-unknown-linux-gnu]
+# linker = "./btool/zig-adapters/x86_64-unknown-linux-gnu/cc"
+# ar = "./btool/zig-adapters/x86_64-unknown-linux-gnu/ar"
+
 [target.x86_64-apple-darwin]
 linker = "./btool/zig-adapters/x86_64-apple-darwin/cc"
 ar = "./btool/zig-adapters/x86_64-apple-darwin/ar"
+

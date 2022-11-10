@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-crate-type = ["cdylib", "staticlib", "rlib"]
+#crate-type = ["cdylib", "staticlib", "rlib"]
+# cdylib fails to build on windorks -_-
+crate-type = ["staticlib", "rlib"]
 
 [dependencies]
 url = { version = "2", features = ["serde"] }

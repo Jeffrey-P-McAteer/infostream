@@ -1,2 +1,15 @@
-#!/bin/sh
-exec zig cc -target x86_64-windows-gnu "${ZIG_ADDTL_LINK_ARGS[@]}" $@
+#!/bin/bash
+
+all_args=("$@")
+
+libpthread_arg_num=not_found
+for i in "${!all_args[@]}"; do
+  if [[ "${all_args[$i]}" = "-l:libpthread.a" ]]; then
+    libpthread_arg_num="${i}"
+  fi
+done
+if ! [[ "$libpthread_arg_num" = 'not_found' ]] ; then
+  set all_args "${all_args:1:$((libpthread_arg_num-1))}" "-Wl,-Bstatic" "-l:libpthread.a" "-Wl,-Bdynamic" "${all_args:$((libpthread_arg_num+1))}"
+fi
+
+exec zig cc -v -target x86_64-windows-gnu -Wl,--subsystem,console ${ZIG_ADDTL_LINK_ARGS[@]} $all_args

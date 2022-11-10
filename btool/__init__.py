@@ -39,12 +39,49 @@ def ensure_rustup_target_installed(target_triple):
     rustup_exe, 'target', 'add', target_triple
   ], check=True)
 
+def find_dir_file_resides_in(directory, file, max_recursion=3):
+  if max_recursion < 1:
+    return None
+
+  for filename in os.listdir(directory):
+    full_filename = os.path.join(directory, filename)
+    if filename == file:
+      return directory
+    if os.path.isdir(full_filename):
+      maybe_found_file = find_dir_file_resides_in(full_filename, file, max_recursion=max_recursion-1)
+      if maybe_found_file is not None:
+        return maybe_found_file
+
+  return None
+
 def get_addtl_link_args(target_triple):
   args = []
 
   if 'windows' in target_triple:
-    if os.path.exists('/usr/x86_64-w64-mingw32/lib'):
-      args.append('-L/usr/x86_64-w64-mingw32/lib ')
+    # libs_we_need = [
+    #   'libgcc_eh.a', 'libpthread.a'
+    # ]
+    # if os.path.exists(os.environ.get('BTOOL_USR_MINGW32_DIR', '/usr/x86_64-w64-mingw32')):
+    #   for lib_name in libs_we_need:
+    #     lib_folder = find_dir_file_resides_in('/usr/x86_64-w64-mingw32', lib_name)
+    #     if lib_folder is not None:
+    #       args.append('-L{}'.format(lib_folder))
+
+    # if os.path.exists(os.environ.get('BTOOL_USR_LIB_GCC_MINGW32_DIR', '/usr/lib/gcc/x86_64-w64-mingw32')):
+    #   for lib_name in libs_we_need:
+    #     lib_folder = find_dir_file_resides_in('/usr/lib/gcc/x86_64-w64-mingw32', lib_name)
+    #     if lib_folder is not None:
+    #       args.append('-L{}'.format(lib_folder))
+    pass
+
+
+
+  elif 'macos' in target_triple:
+    # if os.path.exists('/opt/osxcross/target/SDK/MacOSX11.3.sdk/usr/lib'):
+    #   args.append('-L/opt/osxcross/target/SDK/MacOSX11.3.sdk/usr/lib')
+    # if os.path.exists('/opt/osxcross/target/lib'):
+    #   args.append('-L/opt/osxcross/target/lib')
+    pass
 
   return args
 
@@ -90,14 +127,14 @@ ar = "./{zig_ar_script}"
 
   cargo_env = {}
   cargo_env.update(os.environ)
-  cargo_env['CC'] = os.path.abspath(zig_cc_script)
+  # cargo_env['CC'] = os.path.abspath(zig_cc_script)
   cargo_env['ZIG_ADDTL_LINK_ARGS'] = ' '.join(get_addtl_link_args(target_triple))
 
   run_cmd = [
     'cargo', 'build', '-p', project_name, '--release', '--target', target_triple
   ]
 
-  print(f'> CC={cargo_env["CC"]}')
+  # print(f'> CC={cargo_env["CC"]}')
   print(f'> ZIG_ADDTL_LINK_ARGS={cargo_env["ZIG_ADDTL_LINK_ARGS"]}')
   print(f'> {" ".join(run_cmd)}')
 
