@@ -134,7 +134,7 @@ def cargo_build_target(project_name, target_triple):
           with open(zig_cc_script, 'w') as fd:
             fd.write(f'''
 #!/bin/sh
-exec zig cc -target {target_triple} "${{ZIG_ADDTL_LINK_ARGS[@]}}" $@
+exec zig cc -target {target_triple} $@
 '''.strip())
           make_f_executable(zig_cc_script)
 
@@ -142,14 +142,16 @@ exec zig cc -target {target_triple} "${{ZIG_ADDTL_LINK_ARGS[@]}}" $@
           with open(zig_ar_script, 'w') as fd:
             fd.write(f'''
 #!/bin/sh
-exec zig ar -target {target_triple} "${{ZIG_ADDTL_LINK_ARGS[@]}}" $@
+exec zig ar -target {target_triple} $@
 '''.strip())
           make_f_executable(zig_ar_script)
 
         raise Exception(f'Please fill in the zig CC script templates {zig_adapters_dir} for the target triple {target_triple}')
+
       else:
         # adapters exist, ammend .cargo/config.toml to use the adapters for the triple
-        setup_cargo_cc_ar_tools(target_triple, zig_cc_script, zig_ar_script)
+        setup_cargo_cc_ar_tools(target_triple, os.path.abspath(zig_cc_script), os.path.abspath(zig_ar_script))
+
   else:
 
     # Do not use zig, test for existence of mingw / osxcross and write those to .cargo/config.toml
