@@ -2,5 +2,6 @@
 target/*
 __pycache__/
 __pycache__/*
-
+.btool.env
+.cargo
 
