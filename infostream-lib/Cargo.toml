@@ -1,6 +1,7 @@
 [package]
 name = "infostream"
 version = "0.1.0"
+authors = ["Jeffrey McAteer <jeffrey.p.mcateer@gmail.com>"]
 edition = "2021"
 
 [lib]

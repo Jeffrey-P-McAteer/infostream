@@ -14,6 +14,7 @@ def main(args=sys.argv):
   move_to_repo_root()
   ENV_D = read_env()
   try:
+    build_resources()
 
     build_desktop_x86_64_unknown_linux_gnu()
     build_desktop_x86_64_pc_windows_gnu()
@@ -111,6 +112,14 @@ def gen_all_apple_darwin_bins_between(begin_version, end_version, format_s):
     format_s.format( version=round(float(version) / 10.0, 1), v=round(float(version) / 10.0, 1) ) for version in range(int(begin_version * 10.0), int(end_version * 10.0), 1)
   ]
 
+def get_environ_vars_for_cross_compile_to(target_triple):
+  if 'windows' in target_triple and (not os.name == 'nt'):
+    return {
+      'WINDRES_EXE_PATH': get_first_installed_bin('x86_64-w64-mingw32-windres'),
+    }
+  return {}
+
+
 def cargo_build_target(project_name, target_triple):
   print(f'> building {project_name} for {target_triple}...')
   ensure_rustup_target_installed(target_triple)
@@ -179,6 +188,7 @@ exec zig ar -target {target_triple} $@
 
   cargo_env = {}
   cargo_env.update(os.environ)
+  cargo_env.update(get_environ_vars_for_cross_compile_to(target_triple))
   
   run_cmd = [
     'cargo', 'build', '-p', project_name, '--release', '--target', target_triple
@@ -203,6 +213,46 @@ def build_desktop_x86_64_unknown_linux_gnu():
 def build_desktop_x86_64_apple_darwin():
   cargo_build_target('infostream-desktop', 'x86_64-apple-darwin')
 
+
+
+
+def build_resources():
+  if not os.path.exists('target'):
+    os.makedirs('target')
+
+  try:
+    from cairosvg import svg2png
+  except:
+    traceback.print_exc()
+    subprocess.run([
+      sys.executable, *'-m pip install --user cairosvg'.split()
+    ])
+    from cairosvg import svg2png
+
+  with open(os.path.join('resources', 'icon.svg'), 'r') as fd:
+    svg2png(
+      bytestring=fd.read(),
+      write_to=os.path.join('target', 'icon.png'),
+      output_width=512,
+      output_height=512,
+    )
+
+  try:
+    from PIL import Image
+  except:
+    traceback.print_exc()
+    subprocess.run([
+      sys.executable, *'-m pip install --user Pillow'.split()
+    ])
+    from PIL import Image
+
+  png_icon = Image.open(os.path.join('target', 'icon.png'))
+  icon_sizes = [(16,16), (32, 32), (48, 48), (64,64), (96, 96), (128, 128), (256, 256), (512, 512)]
+  png_icon.save(
+      os.path.join('target', 'icon.ico'), sizes=icon_sizes
+  )
+
+  # TODO macos .app icon nonsense
 
 
 
